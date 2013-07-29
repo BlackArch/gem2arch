@@ -1,0 +1,4 @@
+#!/usr/bin/env ruby
+require 'gem2arch'
+
+Gem2arch.start

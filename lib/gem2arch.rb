@@ -4,7 +4,7 @@ require 'digest/sha1'
 # Download the gem and return specification information
 # @params [String] gemname is the name of the gem to download
 # @params [String] gemver is the version of the gem to download - default nil
-# @return [Array] gem specification
+# @return [Gem::Specification] gem specification object
 def download( gemname, gemver=nil )
   # If gem version is not passed set it
   # to any version greater than 0
@@ -22,6 +22,8 @@ def download( gemname, gemver=nil )
   # Quit if we don't have a spec, we can't continue without it
   # it probably means the gem doesn't exist in rubygems.org
   exit if spec.nil?
+  # Download the .gem file
+  system( "gem fetch #{gemname}" )
   
   return spec
 end
@@ -45,4 +47,69 @@ def digest( file, type )
   return hashv.to_s
 end
 
+# Build the PKGBUILD file using the downloaded specification
+# @params [Gem::Specification] spec is gem specification object
+def build( spec, archdepends=[] )
+  # Set arch=() value of PKGBUILD
+  spec.extensions.empty? ? arch = "'any'" : arch = "'i686' 'x86_64'"
+  # Calculate digest
+  md5sum = digest( "#{spec.full_name}.gem", :MD5 )
+  # Get gem dependencies
+  depends = spec.runtime_dependencies
+  # Modify [Array] depends if it is not empty
+  unless depends.empty?
+    # Break [Array] depends to modify each element
+    depends.map do |dep|
+      # For each dependency we need to modify the comparison
+      # symbol used to be compatible with PKGBUILD
+      dep.requirement.requirements.map do |compare, version|
+        # Modify the comparision symbol for PKGBUILD
+        compare = '>=' if compare == '~>'
+        # Replace the entire string for PKGBUILD
+        archdepends << "'ruby-#{dep.name}#{compare}#{version}'"
+      end
+    end
+  end
 
+  # Build the gem parameters hash
+  params = {
+    name:         spec.name,
+    version:      spec.version,
+    website:      spec.homepage,
+    description:  spec.summary,
+    license:      spec.license,
+    arch:         arch,
+    md5sum:       md5sum,
+    depends:      archdepends.join(" ")
+  }
+
+  pkgbuild( params )
+end
+
+private
+  
+  # Generate the PKGBUILD file
+  # @params [Hash] gem contains all parameters required to generate the PKGBUILD file
+  def pkgbuild( gem )
+    File.open( 'PKGBUILD', 'w' ) do |line|
+      line.puts "pkgname=ruby-#{gem[:name]}"
+      line.puts "_gemname=#{gem[:name]}"
+      line.puts "pkgver=#{gem[:version]}"
+      line.puts "pkgrel=0"
+      line.puts "pkgdesc=\"#{gem[:description]}\""
+      line.puts "arch=(#{gem[:arch]})"
+      line.puts "license=('#{gem[:license]}')"
+      line.puts "makedepends=('ruby')"
+      line.puts "depends=(#{gem[:depends]})"
+      line.puts "url='#{gem[:website]}'"
+      line.puts "source=('http://rubygems.org/downloads/#{gem[:name]}-#{gem[:version]}.gem')"
+      line.puts "md5sums=('#{gem[:md5sum]}')"
+      line.puts "noextract=(#{gem[:name]}-#{gem[:version]}.gem)"
+
+      line.puts "package() {"
+      line.puts "\tcd \"$srcdir\""
+      line.puts "\tlocal _gemdir=\"$(ruby -e 'puts Gem.default_dir')"
+      line.puts "\tgem install --ignore-dependencies --no-user-install -i \"$pkgdir$_gemdir\" -n \"$pkgdir/usr/bin\" $_gemname-$pkgver.gem"
+      line.puts "}"
+    end
+  end

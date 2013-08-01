@@ -18,7 +18,12 @@ module Gem2arch
       # Get gem dependency object 
       depends = Gem::Dependency.new( gemname, version )
       # Fetch gem specification
-      spec_and_source = Gem::SpecFetcher.fetcher.spec_for_dependency( depends, requirement )
+      begin
+        spec_and_source = Gem::SpecFetcher.fetcher.spec_for_dependency( depends, requirement )
+      rescue
+        puts "I can't find any gem by the name #{gemname}"
+        exit
+      end
       # Get gem specification info
       spec = spec_and_source[0][0][0]
       # Get source URI
@@ -106,14 +111,14 @@ module Gem2arch
           line.puts "makedepends=('ruby')"
           line.puts "depends=(#{gem[:depends]})"
           line.puts "url='#{gem[:website]}'"
-          line.puts "source=('http://rubygems.org/downloads/#{gem[:name]}-#{gem[:version]}.gem')"
+          line.puts "source=(\"http://rubygems.org/downloads/#{gem[:name]}-$pkgver.gem\")"
           line.puts "md5sums=('#{gem[:md5sum]}')"
           line.puts "noextract=(#{gem[:name]}-#{gem[:version]}.gem)"
-
+          line.puts ""
           line.puts "package() {"
-          line.puts "\tcd \"$srcdir\""
-          line.puts "\tlocal _gemdir=\"$(ruby -e 'puts Gem.default_dir')"
-          line.puts "\tgem install --ignore-dependencies --no-user-install -i \"$pkgdir$_gemdir\" -n \"$pkgdir/usr/bin\" $_gemname-$pkgver.gem"
+          line.puts "\s\scd \"$srcdir\""
+          line.puts "\s\slocal _gemdir=\"$(ruby -e 'puts Gem.default_dir')\""
+          line.puts "\s\sgem install --ignore-dependencies --no-user-install -i \"$pkgdir$_gemdir\" -n \"$pkgdir/usr/bin\" $_gemname-$pkgver.gem"
           line.puts "}"
         end
       end

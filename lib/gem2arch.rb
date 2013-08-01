@@ -12,7 +12,7 @@ module Gem2arch
     }
 
     OptionParser.new do |opts|
-      opts.banner = "gem2arch 0.0.3 (https://www.github.com/codemunchies/gem2arch)"
+      opts.banner = "gem2arch 0.0.4 (https://www.github.com/codemunchies/gem2arch)"
       opts.banner += "Usage: gem2arch [options]"
 
       opts.on("--build [STRING]", "Gem to download and generate PKGBUILD for") do |gem|

@@ -8,7 +8,7 @@ module Gem2arch
   #
   class Core
 
-    # Make sure we're running ruby 2.0.0 or higher
+    # Make sure we're running ruby 1.9.3 or higher
     def initialize
       unless RUBY_VERSION >= '1.9.3'
         puts "You need ruby >= 1.9.3 to run gem2arch"
@@ -23,7 +23,7 @@ module Gem2arch
     def download( gemname, gemver=nil )
       # If gem version is not passed set it
       # to any version greater than 0
-      version = gemver || ">=0"
+      version = gemver || '>=0'
       # Get gem requirement object 
       requirement = Gem::Requirement.default
       # Get gem dependency object 
@@ -80,6 +80,7 @@ module Gem2arch
       unless depends.empty?
         # Break [Array] depends to modify each element
         depends.map do |dep|
+          next if dep.to_s.include?('(>= 0)')
           # For each dependency we need to modify the comparison
           # symbol used to be compatible with PKGBUILD
           dep.requirement.requirements.map do |compare, version|
@@ -120,7 +121,7 @@ module Gem2arch
           line.puts "arch=(#{gem[:arch]})"
           line.puts "license=('#{gem[:license]}')"
           line.puts "makedepends=('ruby')"
-          line.puts "depends=(#{gem[:depends]})"
+          line.puts "depends=(#{gem[:depends]})" unless gem[:depends].empty? 
           line.puts "url='#{gem[:website]}'"
           line.puts "source=(\"http://rubygems.org/downloads/#{gem[:name]}-$pkgver.gem\")"
           line.puts "md5sums=('#{gem[:md5sum]}')"

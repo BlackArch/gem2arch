@@ -3,7 +3,7 @@
 Gem::Specification.new do |s|
   # Variables:
   s.name = "gem2arch"
-  s.version = "0.0.6"
+  s.version = "0.0.7"
   s.description = "A version of gem2arch by crabtw that creates an ArchLinux PKGBUILD from a ruby gem"
   s.summary = "Creates an ArchLinux PKGBUILD from a ruby gem"
   s.authors = ["Ari Mizrahi"]

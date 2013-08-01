@@ -3,7 +3,7 @@
 Gem::Specification.new do |s|
   # Variables:
   s.name = "gem2arch"
-  s.version = "0.0.1"
+  s.version = "0.0.2"
   s.description = "A version of gem2arch by crabtw that creates an ArchLinux PKGBUILD from a ruby gem"
   s.summary = "Creates an ArchLinux PKGBUILD from a ruby gem"
   s.authors = ["Ari Mizrahi"]
@@ -18,5 +18,5 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
   
   # Dependencies
-  s.add_dependency("net-dns", "~> 0.8.0")
+  #s.add_dependency("net-dns", "~> 0.8.0")
 end

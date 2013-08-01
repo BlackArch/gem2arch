@@ -2,8 +2,19 @@ require 'digest/md5'
 require 'digest/sha1'
 
 module Gem2arch
-
+  #
+  # Core methods for Gem2arch to download gem specifications and build
+  # PKGBUILD files compatible for ArchLinux makepkg
+  #
   class Core
+
+    # Make sure we're running ruby 2.0.0 or higher
+    def initialize
+      unless RUBY_VERSION >= '2.0.0'
+        puts "You need ruby >= 2.0.0 to run gem2arch"
+        exit
+      end
+    end
 
     # Download the gem and return specification information
     # @params [String] gemname is the name of the gem to download
@@ -113,11 +124,11 @@ module Gem2arch
           line.puts "url='#{gem[:website]}'"
           line.puts "source=(\"http://rubygems.org/downloads/#{gem[:name]}-$pkgver.gem\")"
           line.puts "md5sums=('#{gem[:md5sum]}')"
-          line.puts "noextract=(#{gem[:name]}-#{gem[:version]}.gem)"
+          line.puts "noextract=(\"#{gem[:name]}-$pkgver.gem\")"
           line.puts ""
           line.puts "package() {"
           line.puts "\s\scd \"$srcdir\""
-          line.puts "\s\slocal _gemdir=\"$(ruby -e 'puts Gem.default_dir')\""
+          line.puts "\s\slocal _gemdir=$(ruby -e 'puts Gem.default_dir')"
           line.puts "\s\sgem install --ignore-dependencies --no-user-install -i \"$pkgdir$_gemdir\" -n \"$pkgdir/usr/bin\" $_gemname-$pkgver.gem"
           line.puts "}"
         end

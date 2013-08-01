@@ -10,8 +10,8 @@ module Gem2arch
 
     # Make sure we're running ruby 2.0.0 or higher
     def initialize
-      unless RUBY_VERSION >= '2.0.0'
-        puts "You need ruby >= 2.0.0 to run gem2arch"
+      unless RUBY_VERSION >= '1.9.3'
+        puts "You need ruby >= 1.9.3 to run gem2arch"
         exit
       end
     end

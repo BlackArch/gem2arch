@@ -112,9 +112,11 @@ module Gem2arch
       # Generate the PKGBUILD file
       # @params [Hash] gem contains all parameters required to generate the PKGBUILD file
       def pkgbuild( gem )
+        if gem[:license] == "" 
+			gem[:license] = "custom:unknown"
+        end
         File.open( 'PKGBUILD', 'w' ) do |line|
           line.puts "pkgname=ruby-#{gem[:name]}"
-          line.puts "_gemname=#{gem[:name]}"
           line.puts "pkgver=#{gem[:version]}"
           line.puts "pkgrel=0"
           line.puts "pkgdesc=\"#{gem[:description]}\""
@@ -130,7 +132,7 @@ module Gem2arch
           line.puts "package() {"
           line.puts "\s\scd \"$srcdir\""
           line.puts "\s\slocal _gemdir=$(ruby -e 'puts Gem.default_dir')"
-          line.puts "\s\sgem install --ignore-dependencies --no-user-install -i \"$pkgdir$_gemdir\" -n \"$pkgdir/usr/bin\" $_gemname-$pkgver.gem"
+          line.puts "\s\sgem install --ignore-dependencies --no-user-install -i \"$pkgdir$_gemdir\" -n \"$pkgdir/usr/bin\" #{gem[:name]}-$pkgver.gem"
           line.puts "}"
         end
       end

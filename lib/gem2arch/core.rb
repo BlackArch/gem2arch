@@ -24,9 +24,9 @@ module Gem2arch
       # If gem version is not passed set it
       # to any version greater than 0
       version = gemver || '>=0'
-      # Get gem requirement object 
+      # Get gem requirement object
       requirement = Gem::Requirement.default
-      # Get gem dependency object 
+      # Get gem dependency object
       depends = Gem::Dependency.new( gemname, version )
       # Fetch gem specification
       begin
@@ -44,7 +44,7 @@ module Gem2arch
       exit if spec.nil?
       # Download the .gem file
       system( "gem fetch #{gemname}" )
-      
+
       return spec
     end
 
@@ -108,11 +108,11 @@ module Gem2arch
     end
 
     private
-      
+
       # Generate the PKGBUILD file
       # @params [Hash] gem contains all parameters required to generate the PKGBUILD file
       def pkgbuild( gem )
-        if gem[:license] == "" 
+        if gem[:license] == ""
 			gem[:license] = "custom:unknown"
         end
         File.open( 'PKGBUILD', 'w' ) do |line|
@@ -123,7 +123,7 @@ module Gem2arch
           line.puts "arch=(#{gem[:arch]})"
           line.puts "license=('#{gem[:license]}')"
           line.puts "makedepends=('ruby')"
-          line.puts "depends=(#{gem[:depends]})" unless gem[:depends].empty? 
+          line.puts "depends=(#{gem[:depends]})" unless gem[:depends].empty?
           line.puts "url='#{gem[:website]}'"
           line.puts "source=(\"http://rubygems.org/downloads/#{gem[:name]}-$pkgver.gem\")"
           line.puts "md5sums=('#{gem[:md5sum]}')"
@@ -132,7 +132,11 @@ module Gem2arch
           line.puts "package() {"
           line.puts "\s\scd \"$srcdir\""
           line.puts "\s\slocal _gemdir=$(ruby -e 'puts Gem.default_dir')"
-          line.puts "\s\sgem install --ignore-dependencies --no-user-install -i \"$pkgdir$_gemdir\" -n \"$pkgdir/usr/bin\" #{gem[:name]}-$pkgver.gem"
+          line.puts "\s\sif \[[ $CARCH == arm* ]] \; then"
+          line.puts "\s\s\s\sgem install --no-rdoc --no-ri --no-user-install --ignore-dependencies -i \"${pkgdir}${_gemdir}\" -n \"$pkgdir/usr/bin\" #{gem[:name]}-$pkgver.gem"
+          line.puts "\s\selse"
+          line.puts "\s\s\s\sgem install --ignore-dependencies --no-user-install -i \"$pkgdir$_gemdir\" -n \"$pkgdir/usr/bin\" #{gem[:name]}-$pkgver.gem"
+          line.puts "\s\sfi"
           line.puts "}"
         end
       end

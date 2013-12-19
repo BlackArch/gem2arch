@@ -6,6 +6,7 @@ pkgdesc="A version of gem2arch by crabtw that creates an ArchLinux PKGBUILD from
 url="http://github.com/codemunchies/gem2arch"
 arch=('any')
 depends=('ruby')
+conflicts=('gem2arch')
 license=('GPL3')
 source=("git+https://github.com/BlackArch/gem2arch.git")
 md5sums=('SKIP')
